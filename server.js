@@ -153,7 +153,7 @@ addEmployee = () => {
                     }
                 ])
                     .then(roleChoice => {
-                        const roles = roleChoice.roles;
+                        const roles = roleChoice.role;
                         params.push(roles);
 
                         const managerSql = `SELECT * FROM employee`;
@@ -178,11 +178,11 @@ addEmployee = () => {
                                     params.push(manager);
 
                                     const sql = `INSERT INTO employee (first_name, last_name, roles_id, manager_id) VALUES (?, ?, ?, ?)`;
+                                    
 
                                     db.query(sql, params, (err, result) => {
                                         if (err) throw err;
                                         console.log("Employee has been added!")
-
                                         showEmployees();
                                     });
                                 });
@@ -194,15 +194,53 @@ addEmployee = () => {
 
 
 //function to update employee role
-updateEmployee = () =>{
+updateEmployee = () => {
+    const emplSql = `SELECT employee.id, employee.last_name FROM employee`;
+    const roleSql = `SELECT roles.id, roles.title FROM roles`;
+    db.query(emplSql, (err, data) => {
+        if (err) throw err;
 
-}
+        const employees = data.map(({ id, last_name }) => ({ name: last_name, value: id }));
+
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'employee',
+                message: "What is the employee's name?",
+                choices: employees
+            }
+        ]).then(({employee}) => {
+            db.query(roleSql, (err, data) => {
+                if (err) throw err;
+        
+                const roles = data.map(({ id, title }) => ({ name: title, value: id }));
+        
+                inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'role',
+                        message: "What is the employee's role?",
+                        choices: roles
+                    }
+                ]).then(({role}) => {
+                    db.query(`UPDATE employee SET roles_id = ? WHERE id = ?`, [role, employee], (err, data) => {
+                        if (err) throw err;
+                        console.log('Updated Employee Succesfully!...\n')
+                        showEmployees();
+                    })
+                })
+        
+            })
+        })
+    })
+}       
+
 
 //function to view all roles
 viewRoles = () => {
     console.log('Showing all roles...\n');
   
-    const sql = `SELECT roles.id, roles.title, department.name AS department
+    const sql = `SELECT roles.id, roles.title, roles.salary, department.name AS department
                  FROM roles
                  INNER JOIN department ON roles.department_id = department.id`;
     
@@ -234,7 +272,7 @@ addRole = () => {
         name: 'salary',
         message: "What is the salary of this role?",
         validate: addSalary => {
-          if (isNAN(addSalary)) {
+          if ((addSalary)) {
               return true;
           } else {
               console.log('Please enter a salary');
@@ -249,7 +287,7 @@ addRole = () => {
         // grab dept from department table
         const roleSql = `SELECT name, id FROM department`; 
   
-        connection.promise().query(roleSql, (err, data) => {
+        db.query(roleSql, (err, data) => {
           if (err) throw err; 
       
           const dept = data.map(({ name, id }) => ({ name: name, value: id }));
@@ -269,11 +307,11 @@ addRole = () => {
               const sql = `INSERT INTO roles (title, salary, department_id)
                           VALUES (?, ?, ?)`;
   
-              connection.query(sql, params, (err, result) => {
+              db.query(sql, params, (err, result) => {
                 if (err) throw err;
-                console.log('Added' + answer.role + " to roles!"); 
+                console.log('Added ' + answer.role + " to roles!"); 
   
-                showRoles();
+                viewRoles();
             });
         });
         });
@@ -303,25 +341,25 @@ addDepartment = () => {
             message: "What is the name of the department?",
             validate: addFirst => {
                 if (addFirst) {
-                      return true;
+                    return true;
                 } else {
                     console.log('Please enter a department name');
-                        return false;
+                    return false;
                 }
             }
         },
     ])
     .then(answer => {
                     
-        const roleSql = `INSERT INTO department (name)
+        const depSql = `INSERT INTO department (name)
         VALUES (?)`;
-            db.query(sql, answer.addDept, (err, result) => {
-            if (err) throw err;
-            console.log('Added ' + answer.addDept + " to departments!"); 
+            db.query(depSql, answer.addDept, (err, result) => {
+                if (err) throw err;
+                console.log('Added ' + answer.departmentName + " to departments!"); 
       
-            viewDepartments();
-          });
+             viewDepartments();
         });
-      };
+    });
+};
 
 promptUser()
