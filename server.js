@@ -108,7 +108,7 @@ addEmployee = () => {
     inquirer.prompt([
         {
             type: 'input',
-            name: 'fistName',
+            name: 'firstName',
             message: "What is the employee's first name?",
             validate: addFirst => {
                 if (addFirst) {
@@ -179,7 +179,7 @@ addEmployee = () => {
 
                                     const sql = `INSERT INTO employee (first_name, last_name, roles_id, manager_id) VALUES (?, ?, ?, ?)`;
 
-                                    connection.query(sql, params, (err, result) => {
+                                    db.query(sql, params, (err, result) => {
                                         if (err) throw err;
                                         console.log("Employee has been added!")
 
