@@ -177,7 +177,7 @@ addEmployee = () => {
                                     const manager = managerChoice.manager;
                                     params.push(manager);
 
-                                    const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+                                    const sql = `INSERT INTO employee (first_name, last_name, roles_id, manager_id) VALUES (?, ?, ?, ?)`;
 
                                     connection.query(sql, params, (err, result) => {
                                         if (err) throw err;
@@ -194,23 +194,27 @@ addEmployee = () => {
 
 
 //function to update employee role
+updateEmployee = () =>{
 
-//function to view roles
+}
+
+//function to view all roles
 viewRoles = () => {
     console.log('Showing all roles...\n');
   
-    const sql = `SELECT role.id, role.title, department.name AS department
-                 FROM role
-                 INNER JOIN department ON role.department_id = department.id`;
+    const sql = `SELECT roles.id, roles.title, department.name AS department
+                 FROM roles
+                 INNER JOIN department ON roles.department_id = department.id`;
     
-    db.promise().query(sql, (err, rows) => {
+    db.query(sql, (err, rows) => {
       if (err) throw err; 
       console.table(rows); 
       promptUser();
     })
-  };
+};
 
-  addRole = () => {
+//function to add a role
+addRole = () => {
     inquirer.prompt([
       {
         type: 'input', 
@@ -262,7 +266,7 @@ viewRoles = () => {
               const dept = deptChoice.dept;
               params.push(dept);
   
-              const sql = `INSERT INTO role (title, salary, department_id)
+              const sql = `INSERT INTO roles (title, salary, department_id)
                           VALUES (?, ?, ?)`;
   
               connection.query(sql, params, (err, result) => {
@@ -270,26 +274,27 @@ viewRoles = () => {
                 console.log('Added' + answer.role + " to roles!"); 
   
                 showRoles();
-         });
-       });
-     });
-   });
-  };
-            //function to view departments
-            viewDepartments = () => {
-                console.log('Showing all departments...\n');
-                const sql = `SELECT department.id AS id, department.name AS department FROM department`; 
+            });
+        });
+        });
+    });
+};
+
+//function to view departments
+viewDepartments = () => {
+    console.log('Showing all departments...\n');
+    const sql = `SELECT department.id AS id, department.name AS department FROM department`; 
               
-                db.promise().query(sql, (err, rows) => {
-                  if (err) throw err;
-                  console.table(rows);
-                  promptUser();
-                });
-              };
+    db.query(sql, (err, rows) => {
+        if (err) throw err;
+        console.table(rows);
+        promptUser();
+    });
+};
               
 
 
- //function to add departments
+//function to add departments
 addDepartment = () => {
     inquirer.prompt([
         {
@@ -310,7 +315,7 @@ addDepartment = () => {
                     
         const roleSql = `INSERT INTO department (name)
         VALUES (?)`;
-            connection.query(sql, answer.addDept, (err, result) => {
+            db.query(sql, answer.addDept, (err, result) => {
             if (err) throw err;
             console.log('Added ' + answer.addDept + " to departments!"); 
       
