@@ -353,7 +353,7 @@ addDepartment = () => {
                     
         const depSql = `INSERT INTO department (name)
         VALUES (?)`;
-            db.query(depSql, answer.addDept, (err, result) => {
+            db.query(depSql, answer.departmentName, (err, result) => {
                 if (err) throw err;
                 console.log('Added ' + answer.departmentName + " to departments!"); 
       
